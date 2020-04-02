@@ -2,6 +2,7 @@ package_list <- c(
   "tidyverse",
   "rmarkdown",
   "sf",
+  "lubridate",
   "ggpubr",
   "scales",
   "measurements"

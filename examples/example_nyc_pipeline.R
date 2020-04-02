@@ -1,6 +1,6 @@
-source("./dependencies.R")
-source("./ingest_data.R")
-source("./standard_plots.R")
+source("../src/dependencies.R")
+source("../src/ingest_data.R")
+source("../src/standard_plots.R")
 
 map_fb_movement(path_to_map = "../data/nyc/gis/nyc_tab_areas/geo_export_40a90669-c81b-4107-a2b4-d8361a3bd512.shp",
                 path_to_fb_mvmt_data = "../data/nyc/movement_tile/",
@@ -53,7 +53,7 @@ split(nyc_nta, nyc_nta$start_region) %>%
                                            map_nested_under_name = "boro_name"))
 
 
-rmarkdown::render("./nyc_sitrep.Rmd", params = list(
+rmarkdown::render("../templates/nyc_sitrep.Rmd", params = list(
   date = tail(nyc_nta$date,1)),
   output_format = "html_document",
   output_file = paste0("../output/nyc_sitrep/nyc_sitrep_",tail(nyc_nta$date,1),".html"))

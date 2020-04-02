@@ -1,4 +1,4 @@
-source("./dependencies.R")
+source("../src/dependencies.R")
 
 #functions to generate standard plots for reports
 
