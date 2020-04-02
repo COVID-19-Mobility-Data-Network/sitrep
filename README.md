@@ -112,7 +112,7 @@ troubleshooting these issues.
 
 #### 1) Sourcing the data
 
-##### Facebook
+#### Facebook
 **Accessing FB data**
 - Currently the best way to access FB data is through the [geoinsights portal](www.facebook.com/geoinsights-portal/), if you are part of this collaboration but have not been able to access the portal
 please reach out through Basecamp.
