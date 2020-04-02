@@ -322,3 +322,38 @@ The workflow ends with these steps:
 - Getting and manipulating data from Camber
 - Getting and manipulating data from Cuebiq
 - Integration with Basecamp API to upload reports
+
+## Technical information
+- Session info -------------------------------------------------------------------------------------------------------------------------------------  
+ setting  value                       
+ version  R version 3.6.3 (2020-02-29)
+ os       Windows 10 x64              
+ system   x86_64, mingw32             
+ ui       RStudio                     
+ language (EN)                        
+ collate  English_United States.1252  
+ ctype    English_United States.1252  
+ tz       America/New_York            
+ date     2020-04-02                  
+
+- Packages -----------------------------------------------------------------------------------------------------------------------------------------  
+ package      * version date       lib source        
+ dplyr        * 0.8.5   2020-03-07 [1] CRAN (R 3.6.3)  
+ forcats      * 0.5.0   2020-03-01 [1] CRAN (R 3.6.3)  
+ ggplot2      * 3.3.0   2020-03-05 [1] CRAN (R 3.6.3)  
+ ggpubr       * 0.2.5   2020-02-13 [1] CRAN (R 3.6.3)   
+ lubridate    * 1.7.4   2018-04-11 [1] CRAN (R 3.6.2)  
+ magrittr     * 1.5     2014-11-22 [1] CRAN (R 3.6.2)  
+ measurements * 1.4.0   2019-05-28 [1] CRAN (R 3.6.0)  
+ purrr        * 0.3.3   2019-10-18 [1] CRAN (R 3.6.2)  
+ readr        * 1.3.1   2018-12-21 [1] CRAN (R 3.6.2)  
+ rmarkdown    * 2.1     2020-01-20 [1] CRAN (R 3.6.3)  
+ scales       * 1.1.0   2019-11-18 [1] CRAN (R 3.6.3)  
+ sf           * 0.9-0   2020-03-24 [1] CRAN (R 3.6.3)  
+ stringr      * 1.4.0   2019-02-10 [1] CRAN (R 3.6.2)  
+ tibble       * 3.0.0   2020-03-30 [1] CRAN (R 3.6.3)  
+ tidyr        * 1.0.2   2020-01-24 [1] CRAN (R 3.6.3)  
+ tidyverse    * 1.3.0   2019-11-21 [1] CRAN (R 3.6.3)  
+
+[1] C:/Users/Nishant/Documents/R/win-library/3.6  
+[2] C:/Program Files/R/R-3.6.3/library
