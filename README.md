@@ -170,7 +170,7 @@ decided after coordination with local partners in NYC.
 
  Both of these raw
 datasets are provided to collaboration members who have already signed the necessary
-data licensing / use agreements [here]().
+data licensing / use agreements [here](https://filecloud.covid19mobility.org/url/mobilitydemo).
 
 The steps below are found in `src/example_nyc_pipeline.R`.
 
@@ -318,7 +318,9 @@ The workflow ends with these steps:
 - There are many more interesting and useful things that can be done with these data such as modeling of disease dynamics or evaluating metapopulation mobility. Please reach out to the administrative team and we will generate a new repository under the same organization to allow for easier collaboration for these research topics.  
 
 ## Upcoming Features
-- Building a container for
+- Tutorials for individual functions
+- Tutorial for FB pop data 
+- Building a container for running data ingestion
 - Getting and manipulating data from Camber
 - Getting and manipulating data from Cuebiq
 - Integration with Basecamp API to upload reports
