@@ -39,6 +39,6 @@ vignettes/*.pdf
 .Renviron
 
 #data and figs
-*.png
+figs/*
 *.csv
 data/*
