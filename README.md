@@ -324,7 +324,7 @@ The workflow ends with these steps:
 - Integration with Basecamp API to upload reports
 
 ## Technical information
-- Session info -------------------------------------------------------------------------------------------------------------------------------------  
+- Session info ------------------------------------  
  setting  value                       
  version  R version 3.6.3 (2020-02-29)
  os       Windows 10 x64              
@@ -336,7 +336,7 @@ The workflow ends with these steps:
  tz       America/New_York            
  date     2020-04-02                  
 
-- Packages -----------------------------------------------------------------------------------------------------------------------------------------  
+- Packages ----------------------------------------  
  package      * version date       lib source        
  dplyr        * 0.8.5   2020-03-07 [1] CRAN (R 3.6.3)  
  forcats      * 0.5.0   2020-03-01 [1] CRAN (R 3.6.3)  
