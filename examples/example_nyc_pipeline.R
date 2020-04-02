@@ -2,6 +2,7 @@ source("../src/dependencies.R")
 source("../src/ingest_data.R")
 source("../src/standard_plots.R")
 
+#map all movement data from FB to 
 map_fb_movement(path_to_map = "../data/nyc/gis/nyc_tab_areas/geo_export_40a90669-c81b-4107-a2b4-d8361a3bd512.shp",
                 path_to_fb_mvmt_data = "../data/nyc/movement_tile/",
                 tz = "US/Eastern",

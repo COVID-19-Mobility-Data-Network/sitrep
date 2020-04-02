@@ -112,7 +112,7 @@ troubleshooting these issues.
 
 #### 1) Sourcing the data
 
-#### Facebook
+##### Facebook
 **Accessing FB data**
 - Currently the best way to access FB data is through the [geoinsights portal](www.facebook.com/geoinsights-portal/), if you are part of this collaboration but have not been able to access the portal
 please reach out through Basecamp.
@@ -149,7 +149,7 @@ to avoid double counting of the FB population.
 In an effort to avoid duplicating efforts we will not describe the full datasets available
 here along with all of the variables that they provide. You can find:  
 
-1) Basic information on the FB products [here](https://www.facebook.com/help/geoinsights).  
+1) Basic information on the FB products [here](https://www.facebook.com/help/geoinsights). (You need to have access to Geoinsights to be able to view this.)
 
 2) A paper describing more technical aspects [here](https://research.fb.com/publications/facebook-disaster-maps-aggregate-insights-for-crisis-response-recovery/).  
 
@@ -166,29 +166,156 @@ To follow along, you will need to have `tile level movement` data from the `New 
 dataset along with a shapefile for the neighborhood tabulation areas in NYC.
 
 As described above in sourcing the data, the granularity and the spatial map of interest were
-decided after coordination with local partners in NYC. 
+decided after coordination with local partners in NYC.
 
  Both of these raw
 datasets are provided to collaboration members who have already signed the necessary
 data licensing / use agreements [here]().
 
+The steps below are found in `src/example_nyc_pipeline.R`.
+
 ### 2) Convert and map raw data
+**Load resources**
+```r
+source("../src/dependencies.R")
+source("../src/ingest_data.R")
+source("../src/standard_plots.R")
+```
+**Map spatial data**  
+You can find descriptions of all parameters in `../src/ingest_data.R`.
+```r
+#map all movement data from FB to
+map_fb_movement(path_to_map = "../data/nyc/gis/nyc_tab_areas/geo_export_40a90669-c81b-4107-a2b4-d8361a3bd512.shp",
+                path_to_fb_mvmt_data = "../data/nyc/movement_tile/",
+                tz = "US/Eastern",
+                map_region_name = "ntaname",
+                map_crs = 4326,
+                read_from_cache = T,
+                save_to_cache = T,
+                project_area = "NYC",
+                project_name = "tile_movement",
+                data_type = 1) -> mvmt_output
+```
+This returns a list as `mvmt_output` where the first item is a cleaned data set with start and stopping points maps to polygons in the shapefile referenced in `path_to_map`. **Important:** The value for `map_region_name` must be unique across all polygons in the map so that you can merge data back into the spatial file.
 
-### 3) Transform dataset
+**What's happening under the hood?**  
+- loads FB movement data
+- loads spatial data (with unique polygon names as `map_region_name`)
+- extracts start and stop lat/lon from WKT of FB movement data
+- maps start and stop lat/lon to spatial polygons and extracts the unique `map_region_name`.
+- returns start region, stop region, baseline FB people moving, crisis FB people moving and date/time as first item in list
+- returns map used for the spatial mapping as second item in list
 
+### 3) Transform dataset [RESEARCHER DRIVEN]
+These next steps will be driven by the end analysis that the researcher wants to
+produce for the local partners. While this is provided as an example it is by no means the only analysis that can be done.
+
+Use the first item in the returned list. Decide if you want to drop out any of the 8 hours blocks of Facebook time. All time's provided are the start point in the timezone specified in the preceding function. Some 8 hour blocks may, therefore, cross the date boundary. In some cases this may be minimal, however you should decide whether you want to keep this block in your analysis.
+
+For NYC the date time block crosses from 2000-0400. We consider these to be "sleeping hours" and categorize them at beloning to the date that 2000 starts in.
+```r
+mvmt_output[[1]] %>%
+  #extract the hour of the date_time variable
+  mutate(time = as.integer(format(date_time, '%H'))) %>%
+  #decide if you want to drop any time windows
+  #subset(time > 3 & time < 18) %>%
+  #convert date_time to date
+  mutate(date = as_date(date_time)) %>%
+```
+We choose to convert the standard measurement of distance `KM` into `Miles` for ease of interpretation in the US.
+```r
+  #convert km measurements into mi if needed
+  mutate(length = conv_unit(length, "km", "mi")) %>%
+```
+We categorize travel vectors as ending "within" or outside "between" our regions of interest, the neighborhood tabulation areas and create a `dist` variable which calculates the total distance traveled as the number of individuals in `crisis` who moved over the length of that vector.
+```r
+  #create flag for travel inside and outside regions
+  #calculate dist which is total distance traveled
+  mutate(flag = ifelse(start_region == end_region, "Within NTA", "Between NTA"),
+         dist = length*crisis) %>%
+```
+We group all our data by `date`, `start_region` (the NTA which corresponds to the starting point of the vector) and `flag`(the value of within or between NTA travel). Finally we sum baseline, crisis and distance measures.
+```r
+  #summarise values by date, start_region and flag
+  group_by(date, start_region, flag) %>%
+  summarise(baseline = sum(baseline),
+            crisis = sum(crisis),
+            dist = sum(dist)) %>%
+```
+We calculate percent change per aggregated row and output into a dataset for the generation of plots.
+```r
+  #calculate aggregated percent change
+  mutate(perc_change = (crisis-baseline)/baseline) -> nyc_nta
+```
 ### 4) Generating standard plots
+Here we provide templates for plots used to generate area wide and NTA specific analyses.   
 
-### 5) Provide analysis and interpretation
+For our area wide analysis we use the base map along with the data munged above. Please see function in `src/standard_plots.R` for further information about parameters and inputs.
+```r
+generate_area_plots(data = nyc_nta,
+                    map = mvmt_output[[2]],
+                    map_region_name = "ntaname",
+                    project_area = "NYC",
+                    area_of_analysis = "city")
+```
+We finally split the `nyc_nta` data by NTA and generate a travel network plot for each area.
+```r
+split(nyc_nta, nyc_nta$start_region) %>%
+  lapply(function(x) generate_travel_plots(data = x,
+                                           vector_data = mvmt_output[[1]],
+                                           map = mvmt_output[[2]],
+                                           map_region_name = "ntaname",
+                                           project_area = "NYC",
+                                           area_of_analysis = "nta",
+                                           map_nested_under_name = "boro_name"))
+```
+The two functions above will create directory files for the `project_area` and the `area_of_analysis`. They will then dump the generated plots in those files. For the generation of the travel network the plots are output with the following naming convention:  
+
+[`total size of travel network`]-[`boro_name`]-[`nta_name`].png  
+
+This naming convention allows for information about the plot to be transmitted to the standard situation reports.
+
+### 5) Provide analysis and interpretation [RESEARCHER DRIVEN]
+**This key step** includes the researcher reviewing all the plots presented and evaluating the data in general including information from other data sources to provide updates about key points to the local partner. These key points and updated information should be part of the communication to the local partner in the situation report.
 
 ### 6) Publish situation Reports
 
+Here we provide an example of pulling generated plots into a final report that can be shared with your local partner. These can be called with specific date parameters.
+
+```r
+rmarkdown::render("../templates/nyc_sitrep.Rmd", params = list(
+  date = tail(nyc_nta$date,1)),
+  output_format = "html_document",
+  output_file = paste0("../output/nyc_sitrep/nyc_sitrep_",tail(nyc_nta$date,1),".html"))
+
+```
+
+The workflow ends with these steps:  
+1) **Share** the situation report with the local partner  
+2) **Upload** the latest report to Basecamp  
+3) **Provide** any feedback or comments about the process in Basecamp  
+4) **Raise** any issues with the code in GitHub  
+
 ## Adding to or editing this repository
 
-**Bugs and fixes**
+**Bugs and fixes**  
+- Raise an issue
+- Create a branch with the issue number as the first part of the name of the branch: [`issue number`]-[`descriptive name of bug`]
+- Provide the fix and describe how you fixed it
+- Generate a pull request and code review
+- Your fix will be reviewed and added into the master branch
 
 **Adding templates, plots or other functions**
+- Raise an issue
+- Create a branch with the issue number as the first part of the name of the branch: [`issue number`]-[`descriptive name of product`]
+- Make sure you're able to provide a tutorial in a `.md` and add it to `docs/`
+- Modify the primary `README` and add a link to your tutorial
+- Make sure you point to data needed to reproduce your product
+- Generate a pull request and code review
+- Your addition will be reviewed and added into the master branch
 
 **Contributing code that doesn't fit in situation reports**
+- There are many more interesting and useful things that can be done with these data such as modeling of disease dynamics or evaluating metapopulation mobility. Please reach out to the administrative team and we will generate a new repository under the same organization to allow for easier collaboration for these research topics.  
 
 ## Upcoming Features
 - Building a container for
