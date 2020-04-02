@@ -1,3 +1,5 @@
+source("./dependencies.R")
+
 #set of functions and helper functions to read and map FB data
 
 

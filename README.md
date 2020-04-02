@@ -1,10 +1,27 @@
 # COVID-19 Mobility Data Network: Situation Reports
+
 ## Background
+
 ### Motivation
+
 ### Importance of generating local reports
+
 ## Organization
+
 ### File structures
+
+.  
+  ├── build                   # Compiled files (alternatively `dist`)   
+  ├── docs                    # Documentation files (alternatively `doc`)  
+  ├── src                     # Source files (alternatively `lib` or `app`)  
+  ├── test                    # Automated tests (alternatively `spec` or `tests`)  
+  ├── tools                   # Tools and utilities  
+  ├── LICENSE  
+  └── README.md  
+
+
 ## Getting the data
+
 ### Facebook:
 ## Situation Report Pipeline
 ### Cleaning & Spatial Mapping
@@ -18,6 +35,6 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 - Docker build for initial data munging
 - Getting data from Camber
 - Getting data from Cuebiq
-- Integration with Basecamp API to upload reports 
+- Integration with Basecamp API to upload reports
 
 ## How to ask questions

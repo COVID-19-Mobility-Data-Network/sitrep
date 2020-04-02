@@ -1,10 +1,8 @@
+source("./dependencies.R")
+
 #functions to generate standard plots for reports
 
 #area summary function
-
-
-
-
 
 #generates whole area plots from cleaned data
 #VARS

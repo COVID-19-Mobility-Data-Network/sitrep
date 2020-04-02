@@ -1,11 +1,4 @@
-library(tidyverse)
-library(sf)
-library(lubridate)
-library(scales)
-library(measurements)
-library(ggpubr)
-
-
+source("./dependencies.R")
 source("./ingest_data.R")
 source("./standard_plots.R")
 
@@ -17,14 +10,14 @@ map_fb_movement(path_to_map = "../data/nyc/gis/nyc_tab_areas/geo_export_40a90669
                 read_from_cache = T,
                 save_to_cache = T,
                 project_area = "NYC",
-                project_name = "tile_movement_test",
+                project_name = "tile_movement",
                 data_type = 1) -> mvmt_output
 
 
 #mung data
 mvmt_output[[1]] %>%
   #extract the hour of the date_time variable
-  mutate(time = as.integer(format(date_time, '%H'))) %>% 
+  mutate(time = as.integer(format(date_time, '%H'))) %>%
   #decide if you want to drop any time windows
   #subset(time > 3 & time < 18) %>%
   #convert date_time to date
@@ -37,26 +30,26 @@ mvmt_output[[1]] %>%
          dist = length*crisis) %>%
   #summarise values by date, start_region and flag
   group_by(date, start_region, flag) %>%
-  summarise(baseline = sum(baseline), 
-            crisis = sum(crisis), 
+  summarise(baseline = sum(baseline),
+            crisis = sum(crisis),
             dist = sum(dist)) %>%
   #calculate aggregated percent change
   mutate(perc_change = (crisis-baseline)/baseline) -> nyc_nta
 
 
-generate_area_plots(data = nyc_nta, 
+generate_area_plots(data = nyc_nta,
                     map = mvmt_output[[2]],
                     map_region_name = "ntaname",
-                    project_area = "NYC", 
+                    project_area = "NYC",
                     area_of_analysis = "city")
 
-split(nyc_nta, nyc_nta$start_region) %>% 
+split(nyc_nta, nyc_nta$start_region) %>%
   lapply(function(x) generate_travel_plots(data = x,
                                            vector_data = mvmt_output[[1]],
                                            map = mvmt_output[[2]],
                                            map_region_name = "ntaname",
                                            project_area = "NYC",
-                                           area_of_analysis = "nta", 
+                                           area_of_analysis = "nta",
                                            map_nested_under_name = "boro_name"))
 
 
@@ -64,6 +57,3 @@ rmarkdown::render("./nyc_sitrep.Rmd", params = list(
   date = tail(nyc_nta$date,1)),
   output_format = "html_document",
   output_file = paste0("../output/nyc_sitrep/nyc_sitrep_",tail(nyc_nta$date,1),".html"))
-
-
-
