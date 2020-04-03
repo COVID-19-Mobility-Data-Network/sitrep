@@ -43,3 +43,4 @@ figs/*
 *.csv
 data/*
 output/*
+sandbox/*
