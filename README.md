@@ -1,7 +1,7 @@
 # COVID-19 Mobility Data Network: Situation Reports
 
 ## Background
-We are a network of infectious disease epidemiologists at universities around the world working with technology companies to use aggregated mobility data to support the COVID-19 response. Our goal is to provide daily updates to decision-makers at the state and local levels on how well social distancing interventions are working, using anonymized, aggregated data sets from mobile device, and to provide them analytic support for interpretation. You can read more and connect [here](covid19mobility.org).
+We are a network of infectious disease epidemiologists at universities around the world working with technology companies to use aggregated mobility data to support the COVID-19 response. Our goal is to provide daily updates to decision-makers at the state and local levels on how well social distancing interventions are working, using anonymized, aggregated data sets from mobile device, and to provide them analytic support for interpretation. You can read more and connect [here](http://www.covid19mobility.org).
 
 ## Purpose
 
@@ -12,7 +12,7 @@ The needs of local partners and even the interpretability of certain mobility me
 In this repo we aim to provide tools for:  
 
 **Accessing Data**  
-- [x] Facebook (FB) - currently accessed through the [geoinsights portal](www.facebook.com/geoinsights-portal/).
+- [x] Facebook (FB) - currently accessed through the [geoinsights portal](http://www.facebook.com/geoinsights-portal/).
 - [ ] Camber - TBD
 - [ ] Cuebiq - TBD
 
@@ -38,7 +38,7 @@ As researchers generate analyses for different regions, this repository will act
 
 **Communication**  
 If you have yet to become part of the project please reach out at through our
-main website [here](www.covid19mobility.org). Once onboarded you can request direct
+main website [here](http://www.covid19mobility.org). Once onboarded you can request direct
 access to this repository and Basecamp which we are using as our project management tool.
 
 **Availability**  
@@ -114,7 +114,7 @@ troubleshooting these issues.
 
 #### Facebook
 **Accessing FB data**
-- Currently the best way to access FB data is through the [geoinsights portal](www.facebook.com/geoinsights-portal/), if you are part of this collaboration but have not been able to access the portal
+- Currently the best way to access FB data is through the [geoinsights portal](http://www.facebook.com/geoinsights-portal/), if you are part of this collaboration but have not been able to access the portal
 please reach out through Basecamp.
 - [Shenyue Jia](https://www.linkedin.com/in/syjia/) has created a wonderful (unofficial) guide to downloading and working with the [disease prevention maps](https://github.com/syjia/fbcolocation/blob/master/FB_Disease_Prevention_Map_Quick_Start_Guide.pdf) and [collocation data](https://github.com/syjia/fbcolocation/blob/master/Quick_Start_Guide_FB_Colocation_v0315_2020.pdf). If you're unsure how to download or orient yourself with the FB data we recommend that you start there. *Disclaimer:* In certain cases the `Download All` button will not work due to the size of the data. At this point you will need to download the dataset of interest individually per time block using `Download One`.
 
@@ -319,7 +319,7 @@ The workflow ends with these steps:
 
 ## Upcoming Features
 - Tutorials for individual functions
-- Tutorial for FB pop data 
+- Tutorial for FB pop data
 - Building a container for running data ingestion
 - Getting and manipulating data from Camber
 - Getting and manipulating data from Cuebiq
