@@ -11,7 +11,7 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-if(params$install_packages) source('./src/dependencies.R')
+if(params$install_packages) source('../src/dependencies.R')
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyr)
 library(dplyr)
