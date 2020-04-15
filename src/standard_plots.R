@@ -250,5 +250,204 @@ generate_travel_plots <- function(
   
 }
 
+#Pop area summary function
+
+#generates whole area plots from cleaned data
+#VARS
+#' @param data (tibble): munged output from ingest file
+#' @param map (sf object): sf object used to subset data
+#' @param map_region_name (string): the unique variable name in "map" that you want to map your data to
+#' @param project_area (string): The area that you are looking at india/nyc/etc...
+#' @param area_of_analysis (string): The type of region you're looking at city/district/county/etc...
+# input variables for testing and debugging
+ # data <- pop_output[[1]]
+ # map <- pop_output[[2]]
+ # map_region_name <- "NAME10"
+ # project_area <- "Syracuse"
+ # area_of_analysis <- "city"
+
+generate_syracuse_area_plots <- function(
+  data,
+  map,
+  map_region_name,
+  project_area,
+  area_of_analysis
+){
+  
+  ggplot(data = map) + 
+    geom_sf() + 
+    geom_sf_text(aes(label = NAME10)) +
+    theme_bw() +
+    theme(axis.title=element_blank(),
+          axis.text=element_blank(),
+          axis.ticks=element_blank()) +
+    labs(title = "Census Tracts in Syracuse") -> a
+  
+  data %>%
+    group_by(date_time, region) %>%
+    summarise(baseline = sum(n_baseline, na.rm = T), crisis = sum(n_crisis, na.rm = T)) %>%
+    ungroup() %>%
+    mutate(date_time = as_date(date_time)) %>%
+    group_by(date_time, region) %>%
+    summarise(baseline = mean(baseline), crisis = mean(crisis)) %>%
+    subset(date_time %in% tail(sort(unique(date_time)),6)) %>%
+    ungroup() %>%
+    mutate(perc_change = (crisis-baseline)/baseline) %>%
+  {merge(map, .,by.x = eval(map_region_name), by.y = "region", all.y = T)} %>%
+    ggplot() + 
+    geom_sf(data = map, fill = "white", color = "gray") + 
+    geom_sf(aes(fill = perc_change)) +
+    facet_wrap(.~date_time, nrow = 2) +
+    scale_fill_gradient2(labels = scales::percent, high = "red", low = "blue") +
+    theme_bw() +
+    theme(axis.title=element_blank(),
+          axis.text=element_blank(),
+          axis.ticks=element_blank(), 
+          legend.position = "bottom") +
+    labs(fill = "Percent Change", 
+         title = "Percent change in FB population compared to baseline ") -> b
+  
+  
+  data %>%
+    subset(as_date(date_time) > as_date("2020-04-05")) %>%
+    mutate(tod = hour(date_time) %>% factor(labels = c("4AM - 12PM", "12PM - 8PM", "8PM - 4AM"))) %>% 
+    group_by(date_time, tod) %>%
+    summarise(baseline = sum(n_baseline, na.rm = T),
+              crisis = sum(n_crisis, na.rm = T)) %>%
+    mutate(perc_change = (crisis - baseline)/baseline) %>%
+    mutate(weekend = wday(date_time, label = T),
+           weekend = ifelse(weekend %in% c("Sun", "Sat"), "Weekend", "Weekday")) %>%
+    ggplot(aes(x = date_time, y = perc_change, color = tod)) + 
+    geom_line(size = 1.05) + 
+    geom_point(aes(shape = weekend), size = 3) + 
+    geom_hline(yintercept = 0, linetype = 2) + 
+    scale_y_continuous(labels = scales::percent) + 
+    theme_bw() +
+    labs(x = "Date Time", y = "Percent Change", color = "Time of Day", shape = "Day of Week") -> c
+  
+
+  
+  data %>%
+    subset(as_date(date_time) > as_date("2020-04-05")) %>%
+    mutate(tod = hour(date_time) %>% factor(labels = c("4AM - 12PM", "12PM - 8PM", "8PM - 4AM"))) %>% 
+    group_by(date_time, tod, region) %>%
+    summarise(baseline = sum(n_baseline, na.rm = T),
+              crisis = sum(n_crisis, na.rm = T)) %>%
+    mutate(perc_change = (crisis - baseline)/baseline) %>%
+    mutate(weekend = wday(date_time, label = T),
+           weekend = ifelse(weekend %in% c("Sun", "Sat"), "Weekend", "Weekday")) %>%
+    ggplot(aes(x = date_time, y = perc_change, color = tod)) + 
+    geom_line() + 
+    geom_hline(yintercept = 0, linetype = 2) + 
+    scale_y_continuous(labels = scales::percent) + 
+    theme_bw() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    ) + 
+    labs(x = "Date Time", y = "Percent Change", color = "Time of Day", shape = "Day of Week") + 
+    facet_wrap_paginate(~region, ncol = 3, nrow = 5, page = 1) -> d
+  
+  data %>%
+    subset(as_date(date_time) > as_date("2020-04-05")) %>%
+    mutate(tod = hour(date_time) %>% factor(labels = c("4AM - 12PM", "12PM - 8PM", "8PM - 4AM"))) %>% 
+    group_by(date_time, tod, region) %>%
+    summarise(baseline = sum(n_baseline, na.rm = T),
+              crisis = sum(n_crisis, na.rm = T)) %>%
+    mutate(perc_change = (crisis - baseline)/baseline) %>%
+    mutate(weekend = wday(date_time, label = T),
+           weekend = ifelse(weekend %in% c("Sun", "Sat"), "Weekend", "Weekday")) %>%
+    ggplot(aes(x = date_time, y = perc_change, color = tod)) + 
+    geom_line() + 
+    geom_hline(yintercept = 0, linetype = 2) + 
+    scale_y_continuous(labels = scales::percent) + 
+    theme_bw() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    ) + 
+    labs(x = "Date Time", y = "Percent Change", color = "Time of Day", shape = "Day of Week") + 
+    facet_wrap_paginate(~region, ncol = 3, nrow = 5, page = 2) -> e
+  
+  data %>%
+    subset(as_date(date_time) > as_date("2020-04-05")) %>%
+    mutate(tod = hour(date_time) %>% factor(labels = c("4AM - 12PM", "12PM - 8PM", "8PM - 4AM"))) %>% 
+    group_by(date_time, tod, region) %>%
+    summarise(baseline = sum(n_baseline, na.rm = T),
+              crisis = sum(n_crisis, na.rm = T)) %>%
+    mutate(perc_change = (crisis - baseline)/baseline) %>%
+    mutate(weekend = wday(date_time, label = T),
+           weekend = ifelse(weekend %in% c("Sun", "Sat"), "Weekend", "Weekday")) %>%
+    ggplot(aes(x = date_time, y = perc_change, color = tod)) + 
+    geom_line() + 
+    geom_hline(yintercept = 0, linetype = 2) + 
+    scale_y_continuous(labels = scales::percent) + 
+    theme_bw() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    ) + 
+    labs(x = "Date Time", y = "Percent Change", color = "Time of Day", shape = "Day of Week") + 
+    facet_wrap_paginate(~region, ncol = 3, nrow = 5, page = 3) -> f
+  
+  data %>%
+    subset(as_date(date_time) > as_date("2020-04-05")) %>%
+    mutate(tod = hour(date_time) %>% factor(labels = c("4AM - 12PM", "12PM - 8PM", "8PM - 4AM"))) %>% 
+    group_by(date_time, tod, region) %>%
+    summarise(baseline = sum(n_baseline, na.rm = T),
+              crisis = sum(n_crisis, na.rm = T)) %>%
+    mutate(perc_change = (crisis - baseline)/baseline) %>%
+    mutate(weekend = wday(date_time, label = T),
+           weekend = ifelse(weekend %in% c("Sun", "Sat"), "Weekend", "Weekday")) %>%
+    ggplot(aes(x = date_time, y = perc_change, color = tod)) + 
+    geom_line() + 
+    geom_hline(yintercept = 0, linetype = 2) + 
+    scale_y_continuous(labels = scales::percent) + 
+    theme_bw() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    ) + 
+    labs(x = "Date Time", y = "Percent Change", color = "Time of Day", shape = "Day of Week") + 
+    facet_wrap_paginate(~region, ncol = 3, nrow = 5, page = 4) -> g
+  
+  paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/", area_of_analysis, "/") %>%
+    lapply(function(x) dir.create(x, recursive = T, showWarnings = F))
+  
+  suppressMessages(
+    ggsave(filename = paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/",area_of_analysis,"/",project_area,"-ct.png"), 
+           plot = a,
+           dpi = 300)
+  ) 
+  suppressMessages(
+    ggsave(filename = paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/",area_of_analysis,"/",project_area,"-heatmap.png"), 
+           plot = b,
+           dpi = 300)
+  ) 
+  suppressMessages(
+    ggsave(filename = paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/",area_of_analysis,"/",project_area,"-perc_change.png"), 
+           plot = c,
+           dpi = 300)
+  ) 
+  suppressMessages(
+    ggsave(filename = paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/",area_of_analysis,"/",project_area,"-ct-perc_change-1.png"), 
+           plot = d,
+           dpi = 300)
+  ) 
+  suppressMessages(
+    ggsave(filename = paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/",area_of_analysis,"/",project_area,"-ct-perc_change-2.png"), 
+           plot = e,
+           dpi = 300)
+  ) 
+  suppressMessages(
+    ggsave(filename = paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/",area_of_analysis,"/",project_area,"-ct-perc_change-3.png"), 
+           plot = f,
+           dpi = 300)
+  ) 
+  suppressMessages(
+    ggsave(filename = paste0("../figs/", project_area,"/", tail(sort(as_date(data$date_time)),1), "/",area_of_analysis,"/",project_area,"-ct-perc_change-4.png"), 
+           plot = g,
+           dpi = 300)
+  ) 
+  
+  
+}
+
 
 

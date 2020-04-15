@@ -197,7 +197,7 @@ map_fb_movement <- function(
 # project_name <- "india_pop"
 
 #convert and work with FB WKT for population data
-load_fb_pop_map <- function(
+create_fb_pop_map <- function(
   path_to_map,
   path_to_fb_pop_data,
   tz,
@@ -275,4 +275,134 @@ load_fb_pop_map <- function(
   
 }
 
+#reads in raw fb pop data and maps it to your spatial scale of interest
+#VARS
+#' @param path_to_map (string): relative or absolute path to map of interest
+#' @param path_to_fb_pop_data (string): relative or absolute path to folder containing FB movement data
+#' @param tz (string): describe the timezone for the data run Olson() for a list of time zones
+#' @param map_region_name (string): the unique variable name in "map" that you want to capture in your vector data
+#' @param map_crs (integer): The EPSG number for the crs of interest 
+#' @param read_from_cache (boolean): use local cache of previously processed data or run from scratch
+#' @param save_to_cache (boolean): save output to local cache for subsequent use
+#' @param project_area (string): describe the region that this project refers to 
+#' @param projectname (string): the specific type of dataset you're working with for saving the cache
 
+#temporary inputs left in for quick bug fixes
+# path_to_map <- "../data/syracuse/gis/Census_Tracts_in_Syracuse_NY_2010.shp"
+# path_to_fb_mvmt_data <- "../data/syracuse/pop/"
+# tz <- "US/Eastern"
+# map_region_name <- "NAME10"
+# map_crs <- 4326
+# read_from_cache <- T
+# save_to_cache <- T
+# project_area <- "Syracuse"
+# project_name <- "pop"
+
+
+#spatially map vectors of raw FB movement data
+map_fb_pop <- function(
+  path_to_map, 
+  path_to_fb_mvmt_data, 
+  tz,
+  map_region_name,
+  map_crs = 4326,
+  read_from_cache = F, 
+  save_to_cache = T,
+  project_area,
+  project_name,
+  data_type
+){
+  
+  #error checking for input parameters
+  if(read_from_cache & !file.exists(paste0("../cache/",project_area,"/",project_name,".rds"))){
+    print(paste0("We were unable to find a cached file in: ", paste0("../cache/",project_area,"/",project_name,".rds")))
+    print("Running function without reading cached data")
+    read_from_cache <- F
+  }
+  if(!dir.exists(paste0("../cache/", project_area))){
+    dir.create(paste0("../cache/", project_area), recursive = T, showWarnings = F)
+  }
+  if(!file.exists(path_to_map)){
+    stop("Map file not found")
+  }
+  if(!dir.exists(path_to_fb_mvmt_data)){
+    stop("Path to FB population data doesn't exist")
+  }
+  if(list.files(path_to_fb_mvmt_data, pattern = "*?\\.csv$") %>% length == 0){
+    stop("No csv files found in location of population data")
+  }
+  
+  #load map
+  st_read(path_to_map) %>% 
+    st_transform(crs = map_crs) -> map #projects to crs of interest
+  
+  #check to see that the map name variable is unique
+  if(pull(map, eval(map_region_name)) %>% unique %>% length != nrow(map)){
+    stop("Please ensure that the variable name you have chosen on your map is unique for every polygon")
+  }
+  
+  #load data and convert to local time depending on data type
+  suppressMessages(
+    list.files(path = path_to_fb_mvmt_data, pattern = "*?\\.csv$", full.names = T) %>%
+      lapply(function(x) read_csv(x, 
+                                  col_types = cols_only(
+                                    `date_time` = "T",
+                                    `n_baseline` = "d",
+                                    `n_crisis` = "d",
+                                    `lat` = "d",
+                                    `lon` = "d"
+                                  ))) %>%
+      bind_rows() %>%
+      #adjusts datetime
+      mutate("date_time"=with_tz(date_time, tz=tz)) %>%
+      set_names(c("lat", "lon", "date_time", "n_baseline", "n_crisis")) -> raw_data 
+  )
+    
+
+  
+  
+  if(read_from_cache){
+    data <- read_rds(paste0("../cache/",project_area,"/",project_name,".rds"))
+    raw_data <- subset(raw_data, !(date_time %in% unique(data$date_time)))
+  }
+  
+  
+  if(nrow(raw_data) > 0){
+    #mung data
+    
+    #find unique lat/long to reduce computation
+    dplyr::select(raw_data, lat, lon) %>%
+      distinct() %>%
+      mutate(id = row_number()) -> unique_tiles 
+    
+    st_as_sf(unique_tiles, coords = c("lon", "lat"), crs = st_crs(map)) %>%
+      #spatial join to regions of interest
+      st_join(map) %>%
+      as_tibble() %>%
+      dplyr::select(id, eval(map_region_name)) %>%
+      set_names(c("id", "region")) %>%
+      right_join(unique_tiles) %>%
+      dplyr::select(-id) %>%
+      right_join(raw_data) %>%
+      subset(!is.na(region)) -> mapped_data
+    
+
+  }
+  
+  
+  if(read_from_cache){
+    if(exists("mapped_data")){
+      data <- rbind(data,mapped_data)
+    }
+  }else{
+    data <- mapped_data
+  }
+  
+  #save to cache
+  if(save_to_cache){
+    write_rds(data, paste0("../cache/", project_area,"/",project_name,".rds"))
+  }
+  
+  return(list(data, map))
+  
+}
