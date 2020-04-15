@@ -5,7 +5,8 @@ package_list <- c(
   "lubridate",
   "ggpubr",
   "scales",
-  "measurements"
+  "measurements", 
+  "ggforce"
 )
 
 
