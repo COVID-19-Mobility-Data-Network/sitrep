@@ -3,6 +3,15 @@
 ## Background
 We are a network of infectious disease epidemiologists at universities around the world working with technology companies to use aggregated mobility data to support the COVID-19 response. Our goal is to provide daily updates to decision-makers at the state and local levels on how well social distancing interventions are working, using anonymized, aggregated data sets from mobile device, and to provide them analytic support for interpretation. You can read more and connect [here](http://www.covid19mobility.org).
 
+## Examples
+| Region | Data Used | Description of output | Language |  
+|------| ---------|--------|----------|
+|[New York, NY, USA](https://github.com/COVID-19-Mobility-Data-Network/sitrep/tree/master/examples)|Facebook Mobility | A report on comparative change in mobility by neighborhood tabulation areas. | R |
+|[Syracuse, NY, USA](https://github.com/COVID-19-Mobility-Data-Network/sitrep/tree/master/examples)|Facebook Population | A report on comparative change in population by census tract. | R |
+|[Los Angeles, CA, USA](https://github.com/COVID-19-Mobility-Data-Network/sitrep/tree/master/examples/los_angeles)| Facebook Mobility | A report on comparative change in mobility across cities in LA county. | R |
+|[Colorado and Utah, USA](https://github.com/ryanlayer/COvid19) | Facebook Population | We are working with cities and counties in Colorado and Utah to monitor stay-at-home orders using Facebook population density data. We infer activity levels by comparing relative density changes between weeks, between weekdays and weekend ends, and with time-series decomposing to track growth trends independently of regular day/night and weekday/weekend patterns.| Python |
+
+
 ## Purpose
 
 There is no *one-format-fits-all* situation report.  
